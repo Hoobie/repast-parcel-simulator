@@ -1,0 +1,54 @@
+<repast.simphony.gis.visualization.engine.GISDisplayDescriptor>
+  <name>GIS 3D</name>
+  <type>GIS 3D</type>
+  <styles>
+    <entry>
+      <string>pl.edu.agh.model.BoxMachine</string>
+      <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
+    </entry>
+  </styles>
+  <editedStyles>
+    <entry>
+      <string>pl.edu.agh.model.BoxMachine</string>
+      <null/>
+    </entry>
+  </editedStyles>
+  <netStyles/>
+  <editedNetStyles/>
+  <frequency>ON_NEW</frequency>
+  <schedParams>
+    <start>1.0</start>
+    <interval>1.0</interval>
+    <priority>-Infinity</priority>
+    <pType>LAST</pType>
+    <duration>-1.0</duration>
+    <frequency>REPEAT</frequency>
+    <hashCode>170932860</hashCode>
+  </schedParams>
+  <layoutInterval>0</layoutInterval>
+  <layerOrder>
+    <entry>
+      <string>pl.edu.agh.model.BoxMachine</string>
+      <int>0</int>
+    </entry>
+  </layerOrder>
+  <projections>
+    <repast.simphony.scenario.data.ProjectionData>
+      <id>geography</id>
+      <attributes/>
+      <type>geography</type>
+    </repast.simphony.scenario.data.ProjectionData>
+  </projections>
+  <projectionDescriptors>
+    <entry>
+      <string>geography</string>
+      <repast.simphony.visualization.engine.DefaultProjectionDescriptor>
+        <proj reference="../../../../projections/repast.simphony.scenario.data.ProjectionData"/>
+        <props/>
+      </repast.simphony.visualization.engine.DefaultProjectionDescriptor>
+    </entry>
+  </projectionDescriptors>
+  <props/>
+  <viewType>FLAT</viewType>
+  <trackAgents>false</trackAgents>
+</repast.simphony.gis.visualization.engine.GISDisplayDescriptor>
