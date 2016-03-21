@@ -11,11 +11,11 @@ import repast.simphony.dataLoader.ContextBuilder;
 import repast.simphony.space.gis.Geography;
 import repast.simphony.space.gis.GeographyParameters;
 
-public class SimulationContextBuilder implements ContextBuilder<Object> {
+public class ContextInitializer implements ContextBuilder<Object> {
 
 	@Override
 	public Context<Object> build(Context<Object> context) {
-		context.setId("simulation");
+		context.setId("parcel-simulator");
 		
 		GeographyParameters<Object> params = new GeographyParameters<Object>();
 		//params.setAdder(new RandomGisAdder<Object>());
