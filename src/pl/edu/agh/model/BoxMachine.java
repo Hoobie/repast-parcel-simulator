@@ -5,8 +5,15 @@ import repast.simphony.space.gis.Geography;
 public class BoxMachine {
 
 	private Geography<Object> geography;
+	
+	public BoxMachine() {
+	}
 
-	public BoxMachine(Geography<Object> geography) {
+	public Geography<Object> getGeography() {
+		return geography;
+	}
+
+	public void setGeography(Geography<Object> geography) {
 		this.geography = geography;
 	}
 }
