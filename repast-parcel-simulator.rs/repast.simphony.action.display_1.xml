@@ -3,18 +3,52 @@
   <type>GIS 3D</type>
   <styles>
     <entry>
-      <string>pl.edu.agh.model.BoxMachine</string>
-      <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
+      <string>pl.edu.agh.model.SortingCenterAgent</string>
+      <string>pl.edu.agh.model.style.SortingCenterStyle</string>
+    </entry>
+    <entry>
+      <string>pl.edu.agh.model.ParcelMachineAgent</string>
+      <string>pl.edu.agh.model.style.ParcelMachineStyle</string>
+    </entry>
+    <entry>
+      <string>pl.edu.agh.model.AgencyAgent</string>
+      <string>pl.edu.agh.model.style.AgencyStyle</string>
+    </entry>
+    <entry>
+      <string>pl.edu.agh.model.ParcelAgent</string>
+      <string>pl.edu.agh.model.style.ParcelStyle</string>
     </entry>
   </styles>
   <editedStyles>
     <entry>
-      <string>pl.edu.agh.model.BoxMachine</string>
+      <string>pl.edu.agh.model.SortingCenterAgent</string>
+      <null/>
+    </entry>
+    <entry>
+      <string>pl.edu.agh.model.ParcelMachineAgent</string>
+      <null/>
+    </entry>
+    <entry>
+      <string>pl.edu.agh.model.AgencyAgent</string>
+      <null/>
+    </entry>
+    <entry>
+      <string>pl.edu.agh.model.ParcelAgent</string>
       <null/>
     </entry>
   </editedStyles>
-  <netStyles/>
-  <editedNetStyles/>
+  <netStyles>
+    <entry>
+      <string>network</string>
+      <string>repast.simphony.visualization.visualization3D.style.DefaultStyle3D</string>
+    </entry>
+  </netStyles>
+  <editedNetStyles>
+    <entry>
+      <string>network</string>
+      <string>repast.simphony.visualization.visualization3D.style.DefaultStyle3D</string>
+    </entry>
+  </editedNetStyles>
   <frequency>ON_NEW</frequency>
   <schedParams>
     <start>1.0</start>
@@ -23,13 +57,25 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>170932860</hashCode>
+    <hashCode>929025989</hashCode>
   </schedParams>
   <layoutInterval>0</layoutInterval>
   <layerOrder>
     <entry>
-      <string>pl.edu.agh.model.BoxMachine</string>
+      <string>pl.edu.agh.model.SortingCenterAgent</string>
+      <int>2</int>
+    </entry>
+    <entry>
+      <string>pl.edu.agh.model.ParcelMachineAgent</string>
+      <int>1</int>
+    </entry>
+    <entry>
+      <string>pl.edu.agh.model.AgencyAgent</string>
       <int>0</int>
+    </entry>
+    <entry>
+      <string>pl.edu.agh.model.ParcelAgent</string>
+      <int>3</int>
     </entry>
   </layerOrder>
   <projections>
@@ -38,12 +84,24 @@
       <attributes/>
       <type>geography</type>
     </repast.simphony.scenario.data.ProjectionData>
+    <repast.simphony.scenario.data.ProjectionData>
+      <id>network</id>
+      <attributes/>
+      <type>NETWORK</type>
+    </repast.simphony.scenario.data.ProjectionData>
   </projections>
   <projectionDescriptors>
     <entry>
       <string>geography</string>
       <repast.simphony.visualization.engine.DefaultProjectionDescriptor>
         <proj reference="../../../../projections/repast.simphony.scenario.data.ProjectionData"/>
+        <props/>
+      </repast.simphony.visualization.engine.DefaultProjectionDescriptor>
+    </entry>
+    <entry>
+      <string>network</string>
+      <repast.simphony.visualization.engine.DefaultProjectionDescriptor>
+        <proj reference="../../../../projections/repast.simphony.scenario.data.ProjectionData[2]"/>
         <props/>
       </repast.simphony.visualization.engine.DefaultProjectionDescriptor>
     </entry>

@@ -2,5 +2,20 @@
 <parameters>
 
 	<parameter name="randomSeed" displayName="Default Random Seed" type="int" defaultValue="__NULL__" />
-
+	<parameter name="parcelNumber" displayName="Number of Parcels" type="int" 
+			defaultValue="10" 
+			isReadOnly="false" 
+			converter="repast.simphony.parameter.StringConverterFactory$IntConverter"/>
+	<parameter name="sortingCenterNumber" displayName="Number of Sorting Centers" type="int" 
+			defaultValue="2" 
+			isReadOnly="false" 
+			converter="repast.simphony.parameter.StringConverterFactory$IntConverter"/>
+	<parameter name="agencyNumber" displayName="Number of Agencies" type="int" 
+			defaultValue="2" 
+			isReadOnly="false" 
+			converter="repast.simphony.parameter.StringConverterFactory$IntConverter"/>
+	<parameter name="parcelMachineNumber" displayName="Number of Parcel Machines" type="int" 
+			defaultValue="7" 
+			isReadOnly="false" 
+			converter="repast.simphony.parameter.StringConverterFactory$IntConverter"/>
 </parameters>
