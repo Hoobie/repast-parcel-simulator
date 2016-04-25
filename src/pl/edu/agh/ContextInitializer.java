@@ -99,6 +99,21 @@ public class ContextInitializer implements ContextBuilder<Object> {
 			networkObjects.add(agent);
 		}
 		
+		// Add parcel machines from shapefiles		
+		File shapefile = null;
+		ShapefileLoader<ParcelMachineAgent> loader = null;
+		try {
+			shapefile = new File("misc/shp/parcel_machines/parcel_machines.shp");
+			loader = new ShapefileLoader<ParcelMachineAgent>(ParcelMachineAgent.class,
+					shapefile.toURL(), geography, context);
+		} catch (java.net.MalformedURLException e) {
+			e.printStackTrace();
+		}
+		while (loader.hasNext()) {
+			ParcelMachineAgent parcelMachine = loader.next();
+			networkObjects.add(parcelMachine);
+		}
+		
 		// Generate agencies
 		for(int i = 0; i < agencyNumber; i++) {
 			AgencyAgent agent = new AgencyAgent();
@@ -111,23 +126,10 @@ public class ContextInitializer implements ContextBuilder<Object> {
 				net.addEdge(networkObjects.get(j), agent);
 			}
 			networkObjects.add(agent);
-		}
+		}		
 		
 		System.out.println("Number of edges: " + net.numEdges());
 		System.out.println("Number of nodes: " + net.size());
-				
-		File shapefile = null;
-		ShapefileLoader<BoxMachine> loader = null;
-		try {
-			shapefile = new File("misc/shp/boxmachines/boxmachines.shp");
-			loader = new ShapefileLoader<BoxMachine>(BoxMachine.class,
-					shapefile.toURL(), geography, context);
-		} catch (java.net.MalformedURLException e) {
-			e.printStackTrace();
-		}
-		while (loader.hasNext()) {
-			loader.next();
-		}		
 		
 		return context;
 	}
