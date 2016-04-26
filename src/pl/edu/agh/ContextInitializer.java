@@ -19,12 +19,18 @@ import repast.simphony.context.space.graph.NetworkBuilder;
 import repast.simphony.dataLoader.ContextBuilder;
 import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.parameter.Parameters;
+import repast.simphony.random.RandomHelper;
 import repast.simphony.space.gis.Geography;
 import repast.simphony.space.gis.GeographyParameters;
 import repast.simphony.space.gis.ShapefileLoader;
 import repast.simphony.space.graph.Network;
 
 public class ContextInitializer implements ContextBuilder<Object> {
+
+	private static final double KRAKOW_LATITUDE = 50.03;
+	private static final double KRAKOW_LONGITUDE = 19.90;
+
+	private List<ParcelMachineAgent> parcelMachines = new ArrayList<ParcelMachineAgent>();
 
 	@Override
 	public Context<Object> build(Context<Object> context) {
@@ -38,58 +44,65 @@ public class ContextInitializer implements ContextBuilder<Object> {
 		GeometryFactory fac = new GeometryFactory();
 
 		NetworkBuilder<Object> netBuilder = new NetworkBuilder<Object>(
-				"network", context, false);
+				"network", context, true);
 
 		Network<Object> net = netBuilder.buildNetwork();
 
 		Parameters parm = RunEnvironment.getInstance().getParameters();
 		int parcelNumber = (Integer) parm.getValue("parcelNumber");
-		int sortingCenterNumber = (Integer) parm.getValue("sortingCenterNumber");
-		int parcelMachinesNumber = (Integer) parm.getValue("parcelMachineNumber");
+		int sortingCenterNumber = (Integer) parm
+				.getValue("sortingCenterNumber");
+		int parcelMachinesNumber = (Integer) parm
+				.getValue("parcelMachineNumber");
 		int agencyNumber = (Integer) parm.getValue("agencyNumber");
 
-		// Generate parcel agents
-		for (int i = 0; i < parcelNumber; i++) {
-			ParcelAgent agent = new ParcelAgent(geography, i);
-			context.add(agent);
+		// Generate sorting center agents
+		List<SortingCenterAgent> sortingCenters = new ArrayList<SortingCenterAgent>();
 
-			Coordinate coord = new Coordinate(19.90 + 0.05 * Math.random(),
-					50.03 + 0.05 * Math.random());
+		for (int i = 0; i < sortingCenterNumber; i++) {
+			SortingCenterAgent sortingCenter = new SortingCenterAgent();
+			context.add(sortingCenter);
+
+			Coordinate coord = new Coordinate(KRAKOW_LONGITUDE + 0.01
+					* Math.random(), KRAKOW_LATITUDE + 0.01 * Math.random());
 			Point geom = fac.createPoint(coord);
-			geography.move(agent, geom);
+			geography.move(sortingCenter, geom);
+
+			sortingCenters.add(sortingCenter);
 		}
 
-		List<Object> networkObjects = new ArrayList<Object>();
+		// Generate agencies
+		List<AgencyAgent> agencies = new ArrayList<AgencyAgent>();
 
-		// Generate sorting center agents
-		for (int i = 0; i < sortingCenterNumber; i++) {
-			SortingCenterAgent agent = new SortingCenterAgent();
-			context.add(agent);
+		for (int i = 0; i < agencyNumber; i++) {
+			AgencyAgent agency = new AgencyAgent();
+			context.add(agency);
 
-			Coordinate coord = new Coordinate(19.90 + 0.2 * Math.random(),
-					50.03 + 0.2 * Math.random());
+			Coordinate coord = new Coordinate(KRAKOW_LONGITUDE + 0.02
+					* Math.random(), KRAKOW_LATITUDE + 0.02 * Math.random());
 			Point geom = fac.createPoint(coord);
-			geography.move(agent, geom);
+			geography.move(agency, geom);
 
-			for (int j = 0; j < networkObjects.size(); j++) {
-				net.addEdge(networkObjects.get(j), agent);
+			for (SortingCenterAgent sortingCenter : sortingCenters) {
+				net.addEdge(sortingCenter, agency);
 			}
-			networkObjects.add(agent);
+			agencies.add(agency);
 		}
 
 		// Generate parcel machines
 		for (int i = 0; i < parcelMachinesNumber; i++) {
-			ParcelMachineAgent agent = new ParcelMachineAgent();
-			context.add(agent);
+			ParcelMachineAgent parcelMachine = new ParcelMachineAgent();
+			context.add(parcelMachine);
 
-			Coordinate coord = new Coordinate(19.90 + 0.01 * Math.random(),
-					50.03 + 0.01 * Math.random());
+			Coordinate coord = new Coordinate(KRAKOW_LONGITUDE + 0.03
+					* Math.random(), KRAKOW_LATITUDE + 0.03 * Math.random());
 			Point geom = fac.createPoint(coord);
-			geography.move(agent, geom);
-			for (int j = 0; j < networkObjects.size(); j++) {
-				net.addEdge(networkObjects.get(j), agent);
+			geography.move(parcelMachine, geom);
+
+			for (AgencyAgent agency : agencies) {
+				net.addEdge(agency, parcelMachine);
 			}
-			networkObjects.add(agent);
+			parcelMachines.add(parcelMachine);
 		}
 
 		// Add parcel machines from shapefiles
@@ -105,27 +118,33 @@ public class ContextInitializer implements ContextBuilder<Object> {
 		}
 		while (loader.hasNext()) {
 			ParcelMachineAgent parcelMachine = loader.next();
-			networkObjects.add(parcelMachine);
+			for (AgencyAgent agency : agencies) {
+				net.addEdge(agency, parcelMachine);
+			}
+			parcelMachines.add(parcelMachine);
 		}
 
-		// Generate agencies
-		for (int i = 0; i < agencyNumber; i++) {
-			AgencyAgent agent = new AgencyAgent();
+		// Generate parcel agents
+		for (int i = 0; i < parcelNumber; i++) {
+			ParcelMachineAgent senderMachine = getRandomParcelMachine();
+			ParcelMachineAgent receiverMachine = getRandomParcelMachine();
+
+			ParcelAgent agent = new ParcelAgent(geography, senderMachine,
+					receiverMachine);
 			context.add(agent);
 
-			Coordinate coord = new Coordinate(19.90 + 0.03 * Math.random(),
-					50.03 + 0.03 * Math.random());
-			Point geom = fac.createPoint(coord);
-			geography.move(agent, geom);
-			for (int j = 0; j < networkObjects.size(); j++) {
-				net.addEdge(networkObjects.get(j), agent);
-			}
-			networkObjects.add(agent);
+			geography.move(agent, geography.getGeometry(senderMachine));
 		}
 
 		System.out.println("Number of edges: " + net.numEdges());
 		System.out.println("Number of nodes: " + net.size());
 
 		return context;
+	}
+
+	private ParcelMachineAgent getRandomParcelMachine() {
+		int parcelMachineIndex = RandomHelper.nextIntFromTo(0,
+				parcelMachines.size() - 1);
+		return parcelMachines.get(parcelMachineIndex);
 	}
 }
