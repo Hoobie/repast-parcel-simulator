@@ -84,7 +84,8 @@ public class ContextInitializer implements ContextBuilder<Object> {
 			geography.move(agency, geom);
 
 			for (SortingCenterAgent sortingCenter : sortingCenters) {
-				net.addEdge(sortingCenter, agency);
+				net.addEdge(sortingCenter, agency,
+						geography.getGeometry(sortingCenter).distance(geom));
 			}
 			agencies.add(agency);
 		}
@@ -100,7 +101,8 @@ public class ContextInitializer implements ContextBuilder<Object> {
 			geography.move(parcelMachine, geom);
 
 			for (AgencyAgent agency : agencies) {
-				net.addEdge(agency, parcelMachine);
+				net.addEdge(agency, parcelMachine, geography
+						.getGeometry(agency).distance(geom));
 			}
 			parcelMachines.add(parcelMachine);
 		}
@@ -119,7 +121,12 @@ public class ContextInitializer implements ContextBuilder<Object> {
 		while (loader.hasNext()) {
 			ParcelMachineAgent parcelMachine = loader.next();
 			for (AgencyAgent agency : agencies) {
-				net.addEdge(agency, parcelMachine);
+				// TODO: refactor?
+				net.addEdge(
+						agency,
+						parcelMachine,
+						geography.getGeometry(agency).distance(
+								geography.getGeometry(parcelMachine)));
 			}
 			parcelMachines.add(parcelMachine);
 		}
@@ -129,7 +136,7 @@ public class ContextInitializer implements ContextBuilder<Object> {
 			ParcelMachineAgent senderMachine = getRandomParcelMachine();
 			ParcelMachineAgent receiverMachine = getRandomParcelMachine();
 
-			ParcelAgent agent = new ParcelAgent(geography, senderMachine,
+			ParcelAgent agent = new ParcelAgent(geography, net, senderMachine,
 					receiverMachine);
 			context.add(agent);
 

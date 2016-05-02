@@ -6,37 +6,69 @@ import com.vividsolutions.jts.algorithm.Angle;
 import repast.simphony.engine.schedule.ScheduleParameters;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.space.gis.Geography;
+import repast.simphony.space.graph.Network;
 
 public class ParcelAgent {
 	private Geography<Object> geography;
+	private Network<Object> network;
 	private ParcelMachineAgent senderParcelMachine;
 	private ParcelMachineAgent receiverParcelMachine;
 	private Coordinate currentPosition;
+	private Object target;
+	private ParcelStatus status = ParcelStatus.CREATED;
 
-	public ParcelAgent(Geography<Object> geography,
+	public ParcelAgent(Geography<Object> geography, Network<Object> network,
 			ParcelMachineAgent senderMachine, ParcelMachineAgent receiverMachine) {
 		this.geography = geography;
+		this.network = network;
 		this.senderParcelMachine = senderMachine;
 		this.receiverParcelMachine = receiverMachine;
-		this.currentPosition = geography.getGeometry(senderMachine).getCoordinate();
+		this.currentPosition = geography.getGeometry(senderMachine)
+				.getCoordinate();
+		if (senderMachine != receiverMachine) {
+			this.target = senderMachine;
+		}
 	}
 
 	@ScheduledMethod(start = 1, interval = 1, priority = ScheduleParameters.FIRST_PRIORITY)
-	public void step() {
-		Coordinate targetPosition = geography.getGeometry(receiverParcelMachine)
-				.getCoordinate();
-		if (senderParcelMachine == receiverParcelMachine
-				|| isCloseEnoughTo(targetPosition)) {
+	public void move() {
+		if (target == null) {
 			return;
 		}
 		double bearing = Angle.normalizePositive(bearing(currentPosition,
-				targetPosition));
-		currentPosition = geography.moveByVector(this, 0.1, bearing)
+				geography.getGeometry(target).getCoordinate()));
+		currentPosition = geography.moveByVector(this, 0.05, bearing)
 				.getCoordinate();
 	}
 
-	private boolean isCloseEnoughTo(Coordinate coordinate) {
-		return coordinate.distance(currentPosition) < 0.001;
+	@ScheduledMethod(start = 1, interval = 1, priority = ScheduleParameters.FIRST_PRIORITY)
+	public void checkStatus() {
+		if (target == null
+				|| !isCloseEnoughTo(geography.getGeometry(target)
+						.getCoordinate())) {
+			return;
+		}
+		switch (status) {
+		// TODO: use closest instead of random???
+		case CREATED:
+			target = network.getRandomPredecessor(senderParcelMachine);
+			break;
+		case TO_SENDER_AGENCY:
+			target = network.getRandomPredecessor(target);
+			break;
+		case TO_SORTING_CENTER:
+			target = network.getRandomPredecessor(receiverParcelMachine);
+			break;
+		case TO_RECEIVER_AGENCY:
+			target = receiverParcelMachine;
+			break;
+		case TO_RECEIVER_MACHINE:
+			break;
+		case DELIVERED:
+			target = null;
+			return;
+		}
+		status = status.getNextStatus();
 	}
 
 	private double bearing(Coordinate c1, Coordinate c2) {
@@ -52,5 +84,9 @@ public class ParcelAgent {
 		double angle = Math.atan2(y, x);
 		// magic transform
 		return -angle + (Math.PI / 2);
+	}
+
+	private boolean isCloseEnoughTo(Coordinate coordinate) {
+		return coordinate.distance(currentPosition) < 0.0005;
 	}
 }
