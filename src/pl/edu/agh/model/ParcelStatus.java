@@ -8,7 +8,9 @@ public enum ParcelStatus {
 	TO_SORTING_CENTER,
 	TO_RECEIVER_AGENCY,
 	TO_RECEIVER_MACHINE,
-	DELIVERED;
+	DELIVERED,
+	RECEIVED;
+	
 	
 	public ParcelStatus getNextStatus() {
 		ParcelStatus[] values = ParcelStatus.values();
