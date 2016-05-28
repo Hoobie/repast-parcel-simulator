@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Random;
 
 import pl.edu.agh.model.AgencyAgent;
-import pl.edu.agh.model.ParcelAgent;
 import pl.edu.agh.model.ParcelMachineAgent;
 import pl.edu.agh.model.SortingCenterAgent;
 import repast.simphony.context.Context;
@@ -16,7 +15,6 @@ import repast.simphony.context.space.graph.NetworkBuilder;
 import repast.simphony.dataLoader.ContextBuilder;
 import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.parameter.Parameters;
-import repast.simphony.random.RandomHelper;
 import repast.simphony.space.gis.Geography;
 import repast.simphony.space.gis.GeographyParameters;
 import repast.simphony.space.gis.ShapefileLoader;
@@ -58,6 +56,8 @@ public class ContextInitializer implements ContextBuilder<Object> {
 		int parcelMachinesNumber = (Integer) parm
 				.getValue("parcelMachineNumber");
 		int agencyNumber = (Integer) parm.getValue("agencyNumber");
+		int parcelGenerationInterval = (Integer) parm
+				.getValue("parcelGenerationInterval");
 
 		Random r = new Random();
 
@@ -120,7 +120,6 @@ public class ContextInitializer implements ContextBuilder<Object> {
 		}
 
 		// Add parcel machines from shapefiles
-
 		File shapefile = null;
 		ShapefileLoader<ParcelMachineAgent> loader = null;
 		try {
@@ -144,28 +143,18 @@ public class ContextInitializer implements ContextBuilder<Object> {
 		}
 
 		// Generate parcel agents
+		ParcelGenerator parcelGenerator = new ParcelGenerator(context,
+				geography, parcelMachines, sortingCenters, agencies,
+				parcelGenerationInterval);
 		for (int i = 0; i < parcelNumber; i++) {
-			ParcelMachineAgent senderMachine = getRandomParcelMachine();
-			ParcelMachineAgent receiverMachine = getRandomParcelMachine();
-			while (senderMachine == receiverMachine)
-				receiverMachine = getRandomParcelMachine();
-			ParcelAgent agent = new ParcelAgent(geography, senderMachine,
-					receiverMachine, sortingCenters, agencies, i + 1);
-			context.add(agent);
-
-			geography.move(agent, geography.getGeometry(senderMachine));
+			parcelGenerator.generate();
 		}
+		context.add(parcelGenerator);
 
 		System.out.println("Number of edges: " + net.numEdges());
 		System.out.println("Number of nodes: " + net.size());
-		System.out.println("Parcels to send: " + parcelNumber);
+		System.out.println("Initial number of parcels: " + parcelNumber);
 
 		return context;
-	}
-
-	private ParcelMachineAgent getRandomParcelMachine() {
-		int parcelMachineIndex = RandomHelper.nextIntFromTo(0,
-				parcelMachines.size() - 1);
-		return parcelMachines.get(parcelMachineIndex);
 	}
 }

@@ -7,7 +7,9 @@ import java.util.Map;
 import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.engine.schedule.ScheduleParameters;
 import repast.simphony.engine.schedule.ScheduledMethod;
+import repast.simphony.random.RandomHelper;
 import repast.simphony.space.gis.Geography;
+import repast.simphony.util.ContextUtils;
 
 import com.vividsolutions.jts.algorithm.Angle;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -21,7 +23,7 @@ public class ParcelAgent {
 	private ParcelStatus status = ParcelStatus.CREATED;
 	private List<AgencyAgent> agencies;
 	private List<SortingCenterAgent> sortingCenters;
-	private int id;
+	private long id;
 
 	/**
 	 * if target was reached: 1 - closest agentAgency to sender 2 - sorting
@@ -31,14 +33,17 @@ public class ParcelAgent {
 	private int reached = 0;
 	private double tickCount = 0;
 
-	private static final int PARCEL_MACHINE_CAPACITY = 1;
-	private static final int TIME_TO_WAIT_IN_TICKS = 50000;
+	private static final int PARCEL_MACHINE_CAPACITY = 2;
+	private static final int MIN_SPEED = 2;
+	private static final int MAX_SPEED = 20;
+	private static final int MIN_TICKS_TO_WAIT = 1000;
+	private static final int MAX_TICKS_TO_WAIT = 100000;
 
 	public ParcelAgent(Geography<Object> geography,
 			ParcelMachineAgent senderMachine,
 			ParcelMachineAgent receiverMachine,
 			List<SortingCenterAgent> sortingCenters,
-			List<AgencyAgent> agencies, int id) {
+			List<AgencyAgent> agencies, long id) {
 		this.geography = geography;
 		this.senderParcelMachine = senderMachine;
 		this.receiverParcelMachine = receiverMachine;
@@ -84,13 +89,16 @@ public class ParcelAgent {
 
 		if (target == null
 				|| RunEnvironment.getInstance().getCurrentSchedule()
-						.getTickCount() < tickCount + TIME_TO_WAIT_IN_TICKS) {
+						.getTickCount() < tickCount
+						+ RandomHelper.nextIntFromTo(MIN_TICKS_TO_WAIT,
+								MAX_TICKS_TO_WAIT)) {
 			return;
 		}
 
 		double bearing = Angle.normalizePositive(bearing(currentPosition,
 				geography.getGeometry(target).getCoordinate()));
-		currentPosition = geography.moveByVector(this, 3, bearing)
+		currentPosition = geography.moveByVector(this,
+				RandomHelper.nextIntFromTo(MIN_SPEED, MAX_SPEED), bearing)
 				.getCoordinate();
 	}
 
@@ -104,14 +112,14 @@ public class ParcelAgent {
 		switch (status) {
 		case CREATED:
 			target = senderParcelMachine;
-			// senderParcelMachine.setParcelCounter(senderParcelMachine.getParcelCounter()
-			// + 1);
+			senderParcelMachine.setParcelCounter(senderParcelMachine
+					.getParcelCounter() + 1);
 			System.out.println("Parcel nr " + this.id + " created in "
 					+ senderParcelMachine.getName() + ". It goes to "
 					+ receiverParcelMachine.getName());
 			break;
 		case TO_SENDER_AGENCY:
-			// firsty send to closest from current position agency
+			// firstly send to closest from current position agency
 			target = getClosestAgent(agencies, currentPosition);
 			break;
 		case TO_SORTING_CENTER:
@@ -149,6 +157,7 @@ public class ParcelAgent {
 			reached = 5;
 			receiverParcelMachine.setParcelCounter(receiverParcelMachine
 					.getParcelCounter() - 1);
+			ContextUtils.getContext(this).remove(this);
 			return;
 		}
 
