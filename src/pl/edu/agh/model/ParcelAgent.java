@@ -30,8 +30,6 @@ public class ParcelAgent {
 	 */
 	private int reached = 0;
 	private double tickCount = 0;
-	private boolean isMoving = true; // if parcel should move or not
-	private AgencyAgent closestAgency;
 
 	private static final int PARCEL_MACHINE_CAPACITY = 1;
 	private static final int TIME_TO_WAIT_IN_TICKS = 50000;
@@ -83,26 +81,17 @@ public class ParcelAgent {
 			}
 			reached = 0;
 		}
-		if (target == null) {
+
+		if (target == null
+				|| RunEnvironment.getInstance().getCurrentSchedule()
+						.getTickCount() < tickCount + TIME_TO_WAIT_IN_TICKS) {
 			return;
 		}
 
 		double bearing = Angle.normalizePositive(bearing(currentPosition,
 				geography.getGeometry(target).getCoordinate()));
-
-		if (RunEnvironment.getInstance().getCurrentSchedule().getTickCount() < tickCount
-				+ TIME_TO_WAIT_IN_TICKS
-				&& tickCount != 0) {
-			isMoving = false;
-		} else {
-			isMoving = true;
-		}
-
-		if (isMoving) {
-			currentPosition = geography.moveByVector(this, 3, bearing)
-					.getCoordinate();
-		}
-
+		currentPosition = geography.moveByVector(this, 3, bearing)
+				.getCoordinate();
 	}
 
 	@ScheduledMethod(start = 1, interval = 1, priority = ScheduleParameters.FIRST_PRIORITY)
@@ -114,7 +103,6 @@ public class ParcelAgent {
 		}
 		switch (status) {
 		case CREATED:
-			// where parcel supposed to go
 			target = senderParcelMachine;
 			// senderParcelMachine.setParcelCounter(senderParcelMachine.getParcelCounter()
 			// + 1);
@@ -145,19 +133,14 @@ public class ParcelAgent {
 			reached = 3;
 			break;
 		case DELIVERED:
-			// target = null;
-
 			receiverParcelMachine.setParcelCounter(receiverParcelMachine
 					.getParcelCounter() + 1);
 			if (receiverParcelMachine.getParcelCounter() > PARCEL_MACHINE_CAPACITY) {
-				target = closestAgency;
 				status = ParcelStatus.TO_RECEIVER_MACHINE;
 			} else {
 				reached = 4;
-
 			}
 			break;
-		// return;
 		case RECEIVED:
 			// tutaj dodac jakas pauze zeby paczka troche pobyla w paczkomacie
 			// przed jej odbiorem
