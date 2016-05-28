@@ -4,6 +4,15 @@ public class ParcelMachineAgent {
 	private String name;
 	private int parcelCounter;
 	
+	public ParcelMachineAgent() {
+		this("");
+	}
+	
+	public ParcelMachineAgent(String name) {
+		this.name = name;
+		this.parcelCounter = 0;
+	}
+	
 	public int getParcelCounter() {
 		return parcelCounter;
 	}
@@ -18,10 +27,5 @@ public class ParcelMachineAgent {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public ParcelMachineAgent(String name) {
-		this.name = name;
-		this.parcelCounter = 0;
 	}
 }
