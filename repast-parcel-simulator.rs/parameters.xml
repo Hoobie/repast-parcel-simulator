@@ -18,4 +18,8 @@
 			defaultValue="7" 
 			isReadOnly="false" 
 			converter="repast.simphony.parameter.StringConverterFactory$IntConverter"/>
+	<parameter name="parcelGenerationInterval" displayName="Ticks between two parcels generations" type="int" 
+			defaultValue="10000" 
+			isReadOnly="false" 
+			converter="repast.simphony.parameter.StringConverterFactory$IntConverter"/>
 </parameters>
