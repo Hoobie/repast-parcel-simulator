@@ -149,14 +149,14 @@ public class ParcelAgent {
 			break;
 		case RECEIVED:
 			// waiting till picked up by addressee
-			if(RunEnvironment.getInstance().getCurrentSchedule()
-						.getTickCount() < tickCount
-						+ RandomHelper.nextIntFromTo(MIN_TICKS_TO_WAIT_FOR_PICKUP,
-								MAX_TICKS_TO_WAIT_FOR_PICKUP)){
+			if (RunEnvironment.getInstance().getCurrentSchedule()
+					.getTickCount() < tickCount
+					+ RandomHelper.nextIntFromTo(MIN_TICKS_TO_WAIT_FOR_PICKUP,
+							MAX_TICKS_TO_WAIT_FOR_PICKUP)) {
 				status = ParcelStatus.DELIVERED;
 				break;
 			}
-			
+
 			target = null;
 			receiverParcelMachine.setParcelCounter(receiverParcelMachine
 					.getParcelCounter() - 1);
