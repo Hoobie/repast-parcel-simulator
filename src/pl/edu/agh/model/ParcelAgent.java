@@ -33,11 +33,13 @@ public class ParcelAgent {
 	private int reached = 0;
 	private double tickCount = 0;
 
-	private static final int PARCEL_MACHINE_CAPACITY = 2;
+	private static final int PARCEL_MACHINE_CAPACITY = 1;
 	private static final int MIN_SPEED = 2;
 	private static final int MAX_SPEED = 20;
-	private static final int MIN_TICKS_TO_WAIT = 1000;
+	private static final int MIN_TICKS_TO_WAIT = 50000;
 	private static final int MAX_TICKS_TO_WAIT = 100000;
+	private static final int MIN_TICKS_TO_WAIT_FOR_PICKUP = 200000;
+	private static final int MAX_TICKS_TO_WAIT_FOR_PICKUP = 400000;
 
 	public ParcelAgent(Geography<Object> geography,
 			ParcelMachineAgent senderMachine,
@@ -79,10 +81,6 @@ public class ParcelAgent {
 				System.out.println("Parcel nr " + this.id + " delivered to "
 						+ receiverParcelMachine.getName());
 				break;
-			case 5:
-				System.out.println("Parcel nr " + this.id
-						+ " is picked up by addressee");
-				break;
 			}
 			reached = 0;
 		}
@@ -112,8 +110,6 @@ public class ParcelAgent {
 		switch (status) {
 		case CREATED:
 			target = senderParcelMachine;
-			senderParcelMachine.setParcelCounter(senderParcelMachine
-					.getParcelCounter() + 1);
 			System.out.println("Parcel nr " + this.id + " created in "
 					+ senderParcelMachine.getName() + ". It goes to "
 					+ receiverParcelMachine.getName());
@@ -141,22 +137,33 @@ public class ParcelAgent {
 			reached = 3;
 			break;
 		case DELIVERED:
-			receiverParcelMachine.setParcelCounter(receiverParcelMachine
-					.getParcelCounter() + 1);
 			if (receiverParcelMachine.getParcelCounter() > PARCEL_MACHINE_CAPACITY) {
-				status = ParcelStatus.TO_RECEIVER_MACHINE;
+				status = ParcelStatus.TO_SORTING_CENTER;
+				System.out.println(receiverParcelMachine.getName()
+						+ " is full. Parcel nr " + this.id + " is sent back");
 			} else {
+				receiverParcelMachine.setParcelCounter(receiverParcelMachine
+						.getParcelCounter() + 1);
 				reached = 4;
 			}
 			break;
 		case RECEIVED:
-			// tutaj dodac jakas pauze zeby paczka troche pobyla w paczkomacie
-			// przed jej odbiorem
-			// wtedy bedzie widac przepelnianie paczkomatow
+			// waiting till picked up by addressee
+			if(RunEnvironment.getInstance().getCurrentSchedule()
+						.getTickCount() < tickCount
+						+ RandomHelper.nextIntFromTo(MIN_TICKS_TO_WAIT_FOR_PICKUP,
+								MAX_TICKS_TO_WAIT_FOR_PICKUP)){
+				status = ParcelStatus.DELIVERED;
+				break;
+			}
+			
 			target = null;
-			reached = 5;
 			receiverParcelMachine.setParcelCounter(receiverParcelMachine
 					.getParcelCounter() - 1);
+			System.out.println("Parcel nr " + this.id
+					+ " is picked up by addressee");
+			System.out.println("Capacity of " + receiverParcelMachine.getName()
+					+ " is " + receiverParcelMachine.getParcelCounter());
 			ContextUtils.getContext(this).remove(this);
 			return;
 		}
